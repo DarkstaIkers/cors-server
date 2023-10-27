@@ -6,16 +6,31 @@ const host = process.env.HOST || '0.0.0.0';
 const port = process.env.PORT || 3000;
 
 corsProxy.createServer({
-    originWhitelist: [
-      'http://localhost:3000',
-      'http://localhost:5000',
-      'https://portfolio-ravenous.web.app',
-      'https://portfolio-ravenous.firebaseapp.com',
-      'https://test-my-api-endpoint.web.app',
-      'https://test-my-api-endpoint.firebaseapp.com'
-    ],
-    requireHeader: ['origin', 'x-requested-with'],
-    removeHeaders: ['cookie', 'cookie2']
-}).listen(port, host, () => {
-    console.log('Running CORS Anywhere on ' + host + ':' + port);
+  originBlacklist: originBlacklist,
+  originWhitelist: originWhitelist,
+  requireHeader: [],
+  checkRateLimit: checkRateLimit,
+  removeHeaders: [
+    'cookie',
+    'cookie2',
+    // Strip Heroku-specific headers
+    'x-request-start',
+    'x-request-id',
+    'via',
+    'connect-time',
+    'total-route-time',
+    'referer',
+    'origin',
+    // Other Heroku added debug headers
+    // 'x-forwarded-for',
+    // 'x-forwarded-proto',
+    // 'x-forwarded-port',
+  ],
+  redirectSameOrigin: true,
+  httpProxyOptions: {
+    // Do not add X-Forwarded-For, etc. headers, because Heroku already adds it.
+    xfwd: false,
+  },
+}).listen(port, host, function() {
+  console.log('Running CORS Anywhere on ' + host + ':' + port);
 });
